@@ -105,6 +105,20 @@ pub fn unix(facility: Facility) -> Result<Box<Logger>, io::Error> {
   }))
 }
 
+/// Returns a Logger using unix socket to target local syslog at given path
+pub fn unix_custom(facility: Facility, path: &str) -> Result<Box<Logger>, io::Error> {
+    let (process_name, pid) = get_process_info().unwrap();
+    let sock = try!(UnixDatagram::unbound());
+    try!(sock.connect(path));
+    Ok(Box::new(Logger {
+        facility: facility.clone(),
+        hostname: None,
+        process:  process_name,
+        pid:      pid,
+        s:        LoggerBackend::Unix(sock),
+    }))
+}
+
 /// returns a UDP logger connecting `local` and `server`
 pub fn udp<T: ToSocketAddrs>(local: T, server: T, hostname:String, facility: Facility) -> Result<Box<Logger>, io::Error> {
   server.to_socket_addrs().and_then(|mut server_addr_opt| {
