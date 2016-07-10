@@ -28,6 +28,7 @@
 //! ```
 #![crate_type = "lib"]
 
+#[cfg(external_unix_socket)]
 extern crate unix_socket;
 extern crate libc;
 extern crate time;
@@ -41,7 +42,10 @@ use std::net::{SocketAddr,ToSocketAddrs,UdpSocket,TcpStream};
 use std::sync::{Arc, Mutex};
 
 use libc::getpid;
+#[cfg(external_unix_socket)]
 use unix_socket::UnixDatagram;
+#[cfg(not(external_unix_socket))]
+use std::os::unix::net::UnixDatagram;
 use log::{Log,LogRecord,LogMetadata,LogLevel,SetLoggerError};
 
 mod facility;
